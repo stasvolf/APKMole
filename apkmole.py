@@ -4,6 +4,8 @@ try:
 	import os
 	import zipfile
 	import time
+	import random
+	import string
 	from sys import stdin
 except ImportError,e:
 	print "[f] Required module missing. %s" % e.args[0]
@@ -20,15 +22,30 @@ C  = '\033[36m' # cyan
 def analyze(adb, packageTarget):
 	print "[*] Checking root...."
 	supath = adb.find_binary("su")
-	if supath is not None:
+	if "not found" not in supath:
 		print G+"%s" % supath
 		print W
 	else:
 		print R+"[-] didn't find su binary.."+W
-		print R+"[-]Error: %s" % adb.get_error()
-		print W
-	print "[*] Importing app library.."
-	print "soon...."
+		exit(-8)
+	print "[*] Importing app library.." ,
+	tarname = '/sdcard/APKMole_' + ''.join(random.choice(string.letters) for i in xrange(10)) + '.tar'
+	print G+"\t [DONE]"+W
+	print "[*] Creating remote tar file: "+W+tarname ,
+	cmd = supath+" -c 'tar -c /data/data/"+packageTarget+" -f "+tarname+"'"
+	adb.shell_command(cmd)
+	print G+"\t[DONE]"+W
+	print "[*] Retrieving remote file: "+tarname ,
+	if not os.path.exists("./analyse/"):
+		os.makedirs("./analyse/")
+	adb.get_remote_file(tarname, './analyse/' + packageTarget)
+	print G+"\t[DONE]"+W
+	print "[*] Removing remote file: "+tarname ,
+	cmd = 'su -c \'rm %s\'' % tarname
+	adb.shell_command(cmd)
+	print G+"\t[DONE]"+W
+	print "\n[*] TAR file saved on: ./analyse/"+packageTarget+W
+
 def decompile(adb,apkF):
 	apkF=apkF.rstrip('\r\n')
 	print "[*] Importing APK file.." ,
