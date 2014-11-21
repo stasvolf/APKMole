@@ -4,7 +4,7 @@ try:
 	import os
 	import zipfile
 	import time
-	
+	from sys import stdin
 except ImportError,e:
 	print "[f] Required module missing. %s" % e.args[0]
 	exit(-1)
@@ -18,6 +18,15 @@ C  = '\033[36m' # cyan
 
 	
 def analyze(adb, packageTarget):
+	print "[*] Checking root...."
+	supath = adb.find_binary("su")
+	if supath is not None:
+		print G+"%s" % supath
+		print W
+	else:
+		print R+"[-] didn't find su binary.."+W
+		print R+"[-]Error: %s" % adb.get_error()
+		print W
 	print "[*] Importing app library.."
 	print "soon...."
 def decompile(adb,apkF):
@@ -35,7 +44,7 @@ def decompile(adb,apkF):
 			apk=zipfile.ZipFile("./decompile/"+apkF[10:])
 			apk.extractall("./decompile/decompile_"+apkF[10:])
 			print G+"\t[DONE]"+W
-			print R+"1. use dex2jar to decompile classes.dex file."
+			print G+"1. use dex2jar to decompile classes.dex file."
 			print "2. use jd-gui to reflect source.."+W
 		except:
 			print R+"\t[FAILED (APK not found)]"+W
@@ -59,6 +68,8 @@ def getApps(adb):
 	packageTarget=None
 	while (1):
 		packageTarget =  raw_input("[#] Enter package name to target(q - quit):")
+		if (packageTarget is 'q'):
+			exit(-7)
 		try:
 			path2apk = "pm path "+packageTarget
 			theApk=adb.shell_command(path2apk)
@@ -71,10 +82,8 @@ def getApps(adb):
 			break
 		else:
 			print R+"[-] Package not found."+W
-		if (packageTarget is'q'):
-			exit(-7)
 	print "\n----------------------------------------"
-	print "1. Analyze internal files"
+	print "1. Analyze APP internal files(rooted device only)"
 	print "2. Pull and prepare for decompilation"
 	print "3. Pull APK"
 	print "4. Pull application folder"
@@ -120,18 +129,17 @@ def main():
 		error,devices = adb.get_devices()
 		if error is 1:
 			# no devices connected
-			print "[-] No devices connected"
+			print R+"[-] No devices connected"+W
 			print "[*] Waiting for devices..." ,
 			adb.wait_for_device()
 			continue
 		elif error is 2:
-			print "[-] You haven't enought permissions."
+			print R+"[-] You haven't enought permissions."+W
 			exit(-3)
 		print "\t"+G+"[OK]"+W
 		dev = 1
-	# this should never be reached
 	if len(devices) == 0:
-		print R+"[-] No devices detected!"
+		print R+"[-] No devices detected!"+W
 		exit(-4)
 	# show detected devices
 	i = 0
