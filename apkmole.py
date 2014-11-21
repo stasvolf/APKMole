@@ -4,9 +4,11 @@ try:
 	import os
 	import zipfile
 	import time
+	
 except ImportError,e:
 	print "[f] Required module missing. %s" % e.args[0]
 	exit(-1)
+	
 W  = '\033[0m'  # white (normal)
 R  = '\033[31m' # red
 G  = '\033[32m' # green
@@ -17,9 +19,6 @@ C  = '\033[36m' # cyan
 	
 def analyze(adb, packageTarget):
 	print "[*] Importing app library.."
-	#importCMD="pull"+packageTarget+"./"
-	#test=importLib=adb.run_cmd(importCMD)
-	#print test
 	print "soon...."
 def decompile(adb,apkF):
 	apkF=apkF.rstrip('\r\n')
@@ -36,6 +35,8 @@ def decompile(adb,apkF):
 			apk=zipfile.ZipFile("./decompile/"+apkF[10:])
 			apk.extractall("./decompile/decompile_"+apkF[10:])
 			print G+"\t[DONE]"+W
+			print R+"1. use dex2jar to decompile classes.dex file."
+			print "2. use jd-gui to reflect source.."+W
 		except:
 			print R+"\t[FAILED (APK not found)]"+W
 	else:
@@ -49,7 +50,7 @@ def pullApp(apkF):
 
 def getApps(adb):
 	try:
-		print "\n[*] Application installed:\n"
+		print "\n[*] Applications installed:\n"
 		apps=adb.shell_command("pm list packages")
 		print C+apps+W
 	except:
@@ -72,7 +73,6 @@ def getApps(adb):
 			print R+"[-] Package not found."+W
 		if (packageTarget is'q'):
 			exit(-7)
-	print "[*] Target: "+apkFile
 	print "\n----------------------------------------"
 	print "1. Analyze internal files"
 	print "2. Pull and prepare for decompilation"
@@ -93,12 +93,12 @@ def getApps(adb):
 				
 		
 def main():
-	print "################################################"
-	print "#APKing Tool....                               #"
-        print "#                                              #"                 
-        print "#                                              #"
-        print "#                                              #"                 
-        print "################################################"
+	print "############################################################"
+	print "#APKmole - Analyze application on yor android device       #"
+        print "#                                                          #"                 
+        print "#                                                          #"
+        print "#                                                          #"                 
+        print "############################################################"
 	print "\n\n[*] Setting up ADB.."
 	adb = ADB()
 	#adb.set_adb_path('~/android-sdk-linux/platform-tools/adb')
