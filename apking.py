@@ -2,6 +2,8 @@
 try:
 	from pyadb import ADB
 	import os
+	import zipfile
+	import time
 except ImportError,e:
 	print "[f] Required module missing. %s" % e.args[0]
 	exit(-1)
@@ -16,9 +18,20 @@ def decompile(adb,apkF):
 	if not os.path.exists("./decompile"):
 		os.makedirs("./decompile")
 	importCMD="pull "+apkF.rstrip('\r\n')+" ./decompile"
-	print importCMD
-	test=importLib=adb.run_cmd(importCMD)
-	print test
+	pullAPK=importLib=adb.run_cmd(importCMD)
+	time.sleep(2)
+	apkF=apkF.rstrip('\r\n')
+	print " DONE\n[*] Extracting to: /decompile/decompile_"+apkF[10:]+".." ,
+	if not os.path.exists("./decompile/decompile_"+apkF[10:]):
+		os.makedirs("./decompile/decompile_"+apkF[10:])
+		try:
+			apk=zipfile.ZipFile("./decompile/"+apkF[10:])
+			apk.extractall("./decompile/decompile_"+apkF[10:])
+			print " DONE"
+		except:
+			print " FAILED (APK not found)"
+	else:
+		print " FAILED (already exists)"
 def pull(adb, apkF):
 	print "[*] Pulling APK.."
 	
