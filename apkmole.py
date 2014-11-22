@@ -154,12 +154,12 @@ def main():
 			adb.wait_for_device()
 			error,devices = adb.get_devices()
 			continue
-	# show detected devices
+	# devices...
 	i = 0
 	for dev in devices:
 		print "\t%d: %s" % (i,dev)
 		i += 1
-	# if there are more than one devices, ask to the user to choose one of them
+	#more that one device..
 	if i > 1:
 		dev = i + 1
 		while dev < 0 or dev > int(i - 1):
@@ -170,7 +170,7 @@ def main():
 	try:
 		adb.set_target_device(devices[dev])
 	except Exception,e:
-		print "\n[!] Error:\t- ADB: %s\t - Python: %s" % (adb.get_error(),e.args)
+		print R+"\n[-] Error:\t- ADB: %s\t - Python: %s" % (adb.get_error(),e.args)
 		exit(-5)
 	print "\n[+] Using \"%s\" as target device" % devices[dev]
 	getApps(adb)
