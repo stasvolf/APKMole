@@ -53,7 +53,7 @@ def decompile(adb,apkF):
 		os.makedirs("./decompile")
 	importCMD="pull "+apkF+" ./decompile"
 	pullAPK=importLib=adb.run_cmd(importCMD)
-	time.sleep(2)
+	time.sleep(3) # enough time for apk to download..
 	print G+" [DONE]"+W+"\n[*] Extracting to: /decompile/decompile_"+apkF[10:]+".." ,
 	if not os.path.exists("./decompile/decompile_"+apkF[10:]):
 		os.makedirs("./decompile/decompile_"+apkF[10:])
@@ -144,20 +144,16 @@ def main():
 	while dev is 0:
 		print "[*] Detecting devices..." ,
 		error,devices = adb.get_devices()
-		if error is 1:
-			# no devices connected
-			print R+"[-] No devices connected"+W
-			print "[*] Waiting for devices..." ,
-			adb.wait_for_device()
-			continue
-		elif error is 2:
+		if error is 2:
 			print R+"[-] You haven't enought permissions."+W
 			exit(-3)
 		print "\t"+G+"[OK]"+W
 		dev = 1
-	if len(devices) == 0:
-		print R+"[-] No devices detected!"+W
-		exit(-4)
+		if len(devices) == 0:
+			print C+"[-] No devices detected! waiting for devices.."+W
+			adb.wait_for_device()
+			error,devices = adb.get_devices()
+			continue
 	# show detected devices
 	i = 0
 	for dev in devices:
