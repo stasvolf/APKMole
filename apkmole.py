@@ -75,7 +75,7 @@ def decompile(adb,apkF):
 		except:
 			print R+"\t[FAILED (APK not found)]"+W
 	else:
-		print R+"[FAILED (already exists)]"+W
+		print R+"\n[FAILED (already exists)]"+W
 def pull(adb, apkF):
 	print "[*] Pulling APK.."
 	
@@ -108,22 +108,23 @@ def getApps(adb):
 			break
 		else:
 			print R+"[-] Package not found."+W
-	print "\n----------------------------------------"
-	print "1. Analyze APP internal files(rooted device only)"
-	print "2. Pull and prepare for decompilation"
-	print "3. Pull APK"
-	print "4. Pull application folder"
-	option = raw_input("option: ")
-	if option is '1':
-		analyze(adb,packageTarget)
-	elif option is '2':
-		decompile(adb,apkFile)
-	elif option is '3':
-		pull(apkFile)
-	elif option is '4':
-		pullApp(apkFile)
-	else:
-		print "[-] Invalid option"
+	while (1):
+		print "\n----------------------------------------"
+		print "1. Analyze APP internal files(rooted device only)"
+		print "2. Pull and prepare for decompilation"
+		print "3. Pull APK"
+		print "4. Pull application folder"
+		option = raw_input("option: ")
+		if option is '1':
+			analyze(adb,packageTarget)
+		elif option is '2':
+			decompile(adb,apkFile)
+		elif option is '3':
+			pull(apkFile)
+		elif option is '4':
+			pullApp(apkFile)
+		else:
+			print "[-] Invalid option"
 			
 				
 		
