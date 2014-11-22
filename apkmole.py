@@ -6,6 +6,7 @@ try:
 	import time
 	import random
 	import string
+	import tarfile
 	from sys import stdin
 except ImportError,e:
 	print "[f] Required module missing. %s" % e.args[0]
@@ -38,14 +39,22 @@ def analyze(adb, packageTarget):
 	print "[*] Retrieving remote file: "+tarname ,
 	if not os.path.exists("./analyse/"):
 		os.makedirs("./analyse/")
-	adb.get_remote_file(tarname, './analyse/' + packageTarget)
+		if not os.path.exists("./analyse/"+packageTarget):
+			os.makedirs("./analyse/"+packageTarget)
+	adb.get_remote_file(tarname, './analyse/'+packageTarget+'/')
 	print G+"\t[DONE]"+W
 	print "[*] Removing remote file: "+tarname ,
 	cmd = 'su -c \'rm %s\'' % tarname
 	adb.shell_command(cmd)
 	print G+"\t[DONE]"+W
-	print "\n[*] TAR file saved on: ./analyse/"+packageTarget+W
-
+	print "\n[*] TAR file saved on: ./analyse/"+packageTarget+"/"+packageTarget+W
+	tarA = tarfile.open("./analyse/"+packageTarget+"/"+tarname[8:])
+	#tar = tarfile.open("test.tar")
+	for member in tarA.getmembers():
+		tarA.extract(member,path="./analyse/"+packageTarget)
+	#tarA.extractall("./analyse/"+packageTarget+"/"+tarname[8:])
+	tarA.close()
+	
 def decompile(adb,apkF):
 	apkF=apkF.rstrip('\r\n')
 	print "[*] Importing APK file.." ,
