@@ -7,6 +7,7 @@ try:
 	import random
 	import string
 	import tarfile
+	import shutil
 	from sys import stdin
 except ImportError,e:
 	print "[f] Required module missing. %s" % e.args[0]
@@ -29,7 +30,7 @@ def analyze(adb):
 		exit(-6)
 	packageTarget=None
 	while (1):
-		packageTarget =  raw_input("[#] Enter package name to target(q - quit):")
+		packageTarget =  raw_input("[#] Enter package name to analyse(q - quit):")
 		if (packageTarget is 'q'):
 			exit(-7)
 		try:
@@ -40,14 +41,14 @@ def analyze(adb):
 		if ("package:" in theApk):
 			apkP=theApk.find("package:")
 			apkFile=theApk[apkP+8:]
-			print "[*] APK file found: "+apkFile
+			print "[*] APK file found: "+apkFile ,
 			break
 		else:
 			print R+"[-] Package not found."+W
 	print "[*] Checking root...." ,
 	supath = adb.find_binary("su")
 	if "not found" not in supath:
-		print G+"\t[DONE] - "+supath+W
+		print G+"\t[DONE] - "+supath+W ,
 		print W
 	else:
 		print R+"[-] didn't find su binary.."+W
@@ -83,27 +84,56 @@ def analyze(adb):
 		print G+"\t[DONE]"+W
 	except:
 		print R+"\t[FAILED]"+W
-	print "[*] Interesting files:"
-	print "[*] Plist files:"
-	for member in tarA.getnames():
-		if ".plist" in member:
-			print "- "+G+member+W
-	print "[*] DB files:"	
+	print "[*] looking for interesting files.."
+	print "[*] DB files:\n" ,
 	for member in tarA.getnames():
 		if ".db" in member:
-			print "- "+G+member+W
-	print "[*] XML files:"	
+			print "- "+C+member+W
+			try:
+				if not os.path.exists("./analyse/"+packageTarget+"/interesting_files/db"):
+					os.makedirs("./analyse/"+packageTarget+"/interesting_files/db")
+				shutil.copy("./analyse/"+packageTarget+"/"+member,"./analyse/"+packageTarget+"/interesting_files/db")
+			except:
+				print R+"\t[FAILED] - couldn't copy to \"interesting_files\""+W
+	print "[*] XML files:\n"	
 	for member in tarA.getnames():
 		if ".xml" in member:
-			print "- "+G+member+W
-#	print "[*] Scanning files by keywords.."	
-#	for member in tarA.getnames():
-#		if "pass" or "passwd" or "password" or "cookie" or "key" or "user" or "cred" or "credentials" in member:
-#			print "- "+G+member+W
+			print "- "+C+member+W
+			try:
+				if not os.path.exists("./analyse/"+packageTarget+"/interesting_files/xml"):
+					os.makedirs("./analyse/"+packageTarget+"/interesting_files/xml")
+				shutil.copy("./analyse/"+packageTarget+"/"+member,"./analyse/"+packageTarget+"/interesting_files/xml")
+			except:
+				print R+"\t[FAILED] - couldn't copy to \"interesting_files\""+W
+	print G+"\n[*] Checkout \"./analyse/"+packageTarget+"/interesting_files\" for more details.."+W
 	tarA.close()
 
-def decompile(adb,apkF):
-	apkF=apkF.rstrip('\r\n')
+def decompile(adb):
+	try:
+		print "\n[*] Applications installed:\n"
+		apps=adb.shell_command("pm list packages")
+		print C+apps+W
+	except:
+		print R+"[-] Cant retrieve applications installed.."+W
+		exit(-6)
+	packageTarget=None
+	while (1):
+		packageTarget =  raw_input("[#] Enter package as target(q - quit):")
+		if (packageTarget is 'q'):
+			exit(-7)
+		try:
+			path2apk = "pm path "+packageTarget
+			theApk=adb.shell_command(path2apk)
+		except:
+			print R+"[-] Failed to resolve APK file"+W
+		if ("package:" in theApk):
+			apkP=theApk.find("package:")
+			apkFile=theApk[apkP+8:]
+			print "[*] APK file found: "+apkFile ,
+			break
+		else:
+			print R+"[-] Package not found."+W
+	apkF=apkFile.rstrip('\r\n')
 	print "[*] Importing APK file.." ,
 	if not os.path.exists("./decompile"):
 		os.makedirs("./decompile")
@@ -130,22 +160,24 @@ def pullApp(apkF):
 	print "pilling app"
 	
 
-def getApps(adb):
+def menu(adb):
 	while (1):
 		print "\n\n----------------------------------------"
 		print "1. Analyze APP internal files(rooted device only)"
 		print "2. Pull and prepare for decompilation"
 		print "3. Pull APK"
 		print "4. Pull application folder"
-		option = raw_input("option: ")
+		option = raw_input("option(q - quit): ")
 		if option is '1':
 			analyze(adb)
 		elif option is '2':
-			decompile(adb,apkFile)
+			decompile(adb)
 		elif option is '3':
 			pull(apkFile)
 		elif option is '4':
 			pullApp(apkFile)
+		elif option is 'q':
+			exit(-10)
 		else:
 			print "[-] Invalid option"
 			
@@ -206,6 +238,6 @@ def main():
 		print R+"\n[-] Error:\t- ADB: %s\t - Python: %s" % (adb.get_error(),e.args)
 		exit(-5)
 	print "\n[+] Using \"%s\" as target device" % devices[dev]
-	getApps(adb)
+	menu(adb)
 if __name__ == "__main__":
 	main()
