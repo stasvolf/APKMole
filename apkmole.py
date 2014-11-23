@@ -20,18 +20,45 @@ C  = '\033[36m' # cyan
 
 
 	
-def analyze(adb, packageTarget):
-	print "[*] Checking root...."
+def analyze(adb):
+	try:
+		print "\n[*] Applications installed:\n"
+		apps=adb.shell_command("pm list packages")
+		print C+apps+W
+	except:
+		print R+"[-] Cant retrieve applications installed.."+W
+		exit(-6)
+	packageTarget=None
+	while (1):
+		packageTarget =  raw_input("[#] Enter package name to target(q - quit):")
+		if (packageTarget is 'q'):
+			exit(-7)
+		try:
+			path2apk = "pm path "+packageTarget
+			theApk=adb.shell_command(path2apk)
+		except:
+			print R+"[-] Failed to resolve APK file"+W
+		if ("package:" in theApk):
+			apkP=theApk.find("package:")
+			apkFile=theApk[apkP+8:]
+			print G+"[*] APK file found: "+apkFile+W
+			break
+		else:
+			print R+"[-] Package not found."+W
+	print "[*] Checking root...." ,
 	supath = adb.find_binary("su")
 	if "not found" not in supath:
-		print G+"%s" % supath
+		print G+"\t[DONE] - "+supath+W
 		print W
 	else:
 		print R+"[-] didn't find su binary.."+W
 		exit(-8)
+	if os.path.exists("./analyse/"+packageTarget):
+		print R+"[-] path exists..aborting."+W
+		return
 	print "[*] Importing app library.." ,
 	tarname = '/sdcard/APKMole_' + ''.join(random.choice(string.letters) for i in xrange(10)) + '.tar'
-	print G+"\t [DONE]"+W
+	print G+"\t[DONE]"+W
 	print "[*] Creating remote tar file: "+W+tarname ,
 	cmd = supath+" -c 'tar -c /data/data/"+packageTarget+" -f "+tarname+"'"
 	adb.shell_command(cmd)
@@ -39,21 +66,24 @@ def analyze(adb, packageTarget):
 	print "[*] Retrieving remote file: "+tarname ,
 	if not os.path.exists("./analyse/"):
 		os.makedirs("./analyse/")
-		if not os.path.exists("./analyse/"+packageTarget):
-			os.makedirs("./analyse/"+packageTarget)
+	if not os.path.exists("./analyse/"+packageTarget):
+		os.makedirs("./analyse/"+packageTarget)
 	adb.get_remote_file(tarname, './analyse/'+packageTarget+'/')
 	print G+"\t[DONE]"+W
 	print "[*] Removing remote file: "+tarname ,
 	cmd = 'su -c \'rm %s\'' % tarname
 	adb.shell_command(cmd)
 	print G+"\t[DONE]"+W
-	print "\n[*] TAR file saved on: ./analyse/"+packageTarget+"/"+packageTarget+W
-	tarA = tarfile.open("./analyse/"+packageTarget+"/"+tarname[8:])
-	#tar = tarfile.open("test.tar")
-	for member in tarA.getmembers():
-		tarA.extract(member,path="./analyse/"+packageTarget)
-	#tarA.extractall("./analyse/"+packageTarget+"/"+tarname[8:])
-	tarA.close()
+	print G+"\n[*] TAR file saved on: ./analyse/"+packageTarget+"/"+packageTarget+W
+	print "[*] Extracting content.." , 
+	try:
+		tarA = tarfile.open("./analyse/"+packageTarget+"/"+tarname[8:])
+		for member in tarA.getmembers():
+			tarA.extract(member,path="./analyse/"+packageTarget)
+		tarA.close()
+		print G+"\t[DONE]"+W
+	except:
+		print R+"\t[FAILED]"+W
 	
 def decompile(adb,apkF):
 	apkF=apkF.rstrip('\r\n')
@@ -84,30 +114,6 @@ def pullApp(apkF):
 	
 
 def getApps(adb):
-	try:
-		print "\n[*] Applications installed:\n"
-		apps=adb.shell_command("pm list packages")
-		print C+apps+W
-	except:
-		print R+"[-] Cant retrieve applications installed.."+W
-		exit(-6)
-	packageTarget=None
-	while (1):
-		packageTarget =  raw_input("[#] Enter package name to target(q - quit):")
-		if (packageTarget is 'q'):
-			exit(-7)
-		try:
-			path2apk = "pm path "+packageTarget
-			theApk=adb.shell_command(path2apk)
-		except:
-			print R+"[-] Failed to resolve APK file"+W
-		if ("package:" in theApk):
-			apkP=theApk.find("package:")
-			apkFile=theApk[apkP+8:]
-			print G+"[*] APK file found: "+apkFile+W
-			break
-		else:
-			print R+"[-] Package not found."+W
 	while (1):
 		print "\n----------------------------------------"
 		print "1. Analyze APP internal files(rooted device only)"
@@ -116,7 +122,7 @@ def getApps(adb):
 		print "4. Pull application folder"
 		option = raw_input("option: ")
 		if option is '1':
-			analyze(adb,packageTarget)
+			analyze(adb)
 		elif option is '2':
 			decompile(adb,apkFile)
 		elif option is '3':
