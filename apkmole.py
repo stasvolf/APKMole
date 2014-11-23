@@ -19,8 +19,7 @@ G  = '\033[32m' # green
 GR = '\033[37m' # gray
 C  = '\033[36m' # cyan
 
-			
-def analyze(adb):
+def appPrint(adb):
 	try:
 		print "\n[*] Applications installed:\n"
 		apps=adb.shell_command("pm list packages")
@@ -45,6 +44,10 @@ def analyze(adb):
 			break
 		else:
 			print R+"[-] Package not found."+W
+	return (packageTarget,apkFile)
+
+def analyze(adb):
+	packageTarget,apkFile=appPrint(adb)
 	print "[*] Checking root...." ,
 	supath = adb.find_binary("su")
 	if "not found" not in supath:
@@ -109,30 +112,7 @@ def analyze(adb):
 	tarA.close()
 
 def decompile(adb):
-	try:
-		print "\n[*] Applications installed:\n"
-		apps=adb.shell_command("pm list packages")
-		print C+apps+W
-	except:
-		print R+"[-] Cant retrieve applications installed.."+W
-		exit(-6)
-	packageTarget=None
-	while (1):
-		packageTarget =  raw_input("[#] Enter package as target(q - quit):")
-		if (packageTarget is 'q'):
-			exit(-7)
-		try:
-			path2apk = "pm path "+packageTarget
-			theApk=adb.shell_command(path2apk)
-		except:
-			print R+"[-] Failed to resolve APK file"+W
-		if ("package:" in theApk):
-			apkP=theApk.find("package:")
-			apkFile=theApk[apkP+8:]
-			print "[*] APK file found: "+apkFile ,
-			break
-		else:
-			print R+"[-] Package not found."+W
+	packageTarget,apkFile = appPrint(adb)
 	apkF=apkFile.rstrip('\r\n')
 	print "[*] Importing APK file.." ,
 	if not os.path.exists("./decompile"):
