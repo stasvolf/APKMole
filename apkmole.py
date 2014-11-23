@@ -18,8 +18,7 @@ G  = '\033[32m' # green
 GR = '\033[37m' # gray
 C  = '\033[36m' # cyan
 
-
-	
+			
 def analyze(adb):
 	try:
 		print "\n[*] Applications installed:\n"
@@ -41,7 +40,7 @@ def analyze(adb):
 		if ("package:" in theApk):
 			apkP=theApk.find("package:")
 			apkFile=theApk[apkP+8:]
-			print G+"[*] APK file found: "+apkFile+W
+			print "[*] APK file found: "+apkFile
 			break
 		else:
 			print R+"[-] Package not found."+W
@@ -74,17 +73,35 @@ def analyze(adb):
 	cmd = 'su -c \'rm %s\'' % tarname
 	adb.shell_command(cmd)
 	print G+"\t[DONE]"+W
-	print G+"\n[*] TAR file saved on: ./analyse/"+packageTarget+"/"+packageTarget+W
+	print G+"[*] TAR file saved on: ./analyse/"+packageTarget+"/"+packageTarget+W
 	print "[*] Extracting content.." , 
 	try:
 		tarA = tarfile.open("./analyse/"+packageTarget+"/"+tarname[8:])
 		for member in tarA.getmembers():
 			tarA.extract(member,path="./analyse/"+packageTarget)
-		tarA.close()
+		
 		print G+"\t[DONE]"+W
 	except:
 		print R+"\t[FAILED]"+W
-	
+	print "[*] Interesting files:"
+	print "[*] Plist files:"
+	for member in tarA.getnames():
+		if ".plist" in member:
+			print "- "+G+member+W
+	print "[*] DB files:"	
+	for member in tarA.getnames():
+		if ".db" in member:
+			print "- "+G+member+W
+	print "[*] XML files:"	
+	for member in tarA.getnames():
+		if ".xml" in member:
+			print "- "+G+member+W
+#	print "[*] Scanning files by keywords.."	
+#	for member in tarA.getnames():
+#		if "pass" or "passwd" or "password" or "cookie" or "key" or "user" or "cred" or "credentials" in member:
+#			print "- "+G+member+W
+	tarA.close()
+
 def decompile(adb,apkF):
 	apkF=apkF.rstrip('\r\n')
 	print "[*] Importing APK file.." ,
@@ -115,7 +132,7 @@ def pullApp(apkF):
 
 def getApps(adb):
 	while (1):
-		print "\n----------------------------------------"
+		print "\n\n----------------------------------------"
 		print "1. Analyze APP internal files(rooted device only)"
 		print "2. Pull and prepare for decompilation"
 		print "3. Pull APK"
