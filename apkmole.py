@@ -72,6 +72,10 @@ def meminfo(adb):
 	packageTarget,apkFile=appPrint(adb)
 	cmd = "dumpsys meminfo "+packageTarget
 	print adb.shell_command(cmd)
+	
+def lnlaunceActivities(adb):
+	print "soon..."
+	
 def analyze(adb):
 	packageTarget,apkFile=appPrint(adb)
 	print "[*] Checking root...." ,
@@ -145,31 +149,29 @@ def analyze(adb):
 	print G+"\n[*] Checkout \"./analyse/"+packageTarget+"/interesting_files\" for more details.."+W
 	tarA.close()
 
-def decompile(adb):
+def extractAPK(adb):
 	packageTarget,apkFile = appPrint(adb)
 	apkF=apkFile.rstrip('\r\n')
 	print "[*] Importing APK file.." ,
 	try:
-		if not os.path.exists("./decompile"):
-			os.makedirs("./decompile")
+		if not os.path.exists("./extract"):
+			os.makedirs("./extract")
 	except:
 		print R+"\t[FAILED] - can't create directory."+W
-	importCMD="pull "+apkF+" ./decompile"
+	importCMD="pull "+apkF+" ./extract"
 	try:
 		pullAPK=adb.run_cmd(importCMD)
 	except:
 		print R+"\t[FAILED] - can't pull APK"+W
 		return
 	time.sleep(3) # enough time for apk to download..
-	print G+" [DONE]"+W+"\n[*] Extracting to: /decompile/decompile_"+apkF[10:]+".." ,
-	if not os.path.exists("./decompile/decompile_"+apkF[10:]):
-		os.makedirs("./decompile/decompile_"+apkF[10:])
+	print G+" [DONE]"+W+"\n[*] Extracting to: /extract/extract_"+apkF[10:]+".." ,
+	if not os.path.exists("./extract/extract_"+apkF[10:]):
+		os.makedirs("./extract/extract_"+apkF[10:])
 		try:
-			apk=zipfile.ZipFile("./decompile/"+apkF[10:])
-			apk.extractall("./decompile/decompile_"+apkF[10:])
+			apk=zipfile.ZipFile("./extract/"+apkF[10:])
+			apk.extractall("./extract/extract_"+apkF[10:])
 			print G+"\t[DONE]"+W
-			print G+"1. use dex2jar to decompile classes.dex file."
-			print "2. use jd-gui to reflect source.."+W
 		except:
 			print R+"\t[FAILED (APK not found)]"+W
 	else:
@@ -179,18 +181,21 @@ def decompile(adb):
 def menu(adb):
 	while (1):
 		print "\n\n----------------------------------------"
-		print "1. Analyze APP internal files(rooted device only)"
-		print "2. Pull application APK and prepare for decompilation"
+		print "1. Analyze APP internal files and look for interesting files(rooted device only)"
+		print "2. Pull application APK and extract"
 		print "3. Dump meminfo of application"
-		print "4. Bypass device authentication(password,pattern...)"
+		print "4. List and launch Activities(soon)"
+		print "5. Bypass device authentication(password,pattern...)"
 		option = raw_input("option(q - quit): ")
 		if option is '1':
 			analyze(adb)
 		elif option is '2':
-			decompile(adb)
+			extractAPK(adb)
 		elif option is '3':
 			meminfo(adb)
 		elif option is '4':
+			lnlaunceActivities(adb)
+		elif option is '5':
 			bypass(adb)
 		elif option is 'q':
 			exit(-10)
@@ -200,16 +205,24 @@ def menu(adb):
 				
 		
 def main():
-	print "############################################################"
-	print "#APKmole - Analyze application on yor android device       #"
-        print "#                                                          #"                 
-        print "#                                                          #"
-        print "#                                                          #"                 
-        print "############################################################"
+	APKTOOL = "/home/stas/Downloads/apktool_2.0.0rc3.jar"  # APKTOOL Directory
+	ADBTOOL = "/usr/bin/adb" # ADB Directory
+	print "#########################################################################"
+	print "#                             APKmole V1.0                              #"
+	print "# ADB & APKTool wrapper to analyse application on your Android device   #"
+	print "# Author: Stas Volfus                                                   #"
+	print "#                                                                       #"
+	print "#########################################################################"
+	print "\nADB Path: "+ADBTOOL
+	print "APKtool Path: "+APKTOOL    
 	print "\n\n[*] Setting up ADB.."
 	adb = ADB()
-	#adb.set_adb_path('~/android-sdk-linux/platform-tools/adb')
-	adb.set_adb_path('/usr/bin/adb') 	# path to adb..
+	adb.set_adb_path(ADBTOOL) 	# path to adb..
+	print "[*] Checking APKTool path.." ,
+	if os.path.isfile(APKTOOL) is False:
+		print R+"\t[FAILED] - path not found."+W
+		exit(-1)
+	print G+"\t[OK]"+W
 	print "[*] Checking ADB path.." ,
 	if adb.check_path() is False:
 		print "\t"+R+"\t[FAILED] - ADB path doesn't exists..\n"+W
