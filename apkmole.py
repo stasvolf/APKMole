@@ -149,40 +149,40 @@ def analyze(adb):
 	print G+"\n[*] Checkout \"./analyse/"+packageTarget+"/interesting_files\" for more details.."+W
 	tarA.close()
 
-def extractAPK(adb):
+def decompileAPK(adb,APKTOOL):
 	packageTarget,apkFile = appPrint(adb)
 	apkF=apkFile.rstrip('\r\n')
 	print "[*] Importing APK file.." ,
 	try:
-		if not os.path.exists("./extract"):
-			os.makedirs("./extract")
+		if not os.path.exists("./decompile"):
+			os.makedirs("./decompile")
 	except:
 		print R+"\t[FAILED] - can't create directory."+W
-	importCMD="pull "+apkF+" ./extract"
+	importCMD="pull "+apkF+" ./decompile"
 	try:
 		pullAPK=adb.run_cmd(importCMD)
 	except:
 		print R+"\t[FAILED] - can't pull APK"+W
 		return
 	time.sleep(3) # enough time for apk to download..
-	print G+" [DONE]"+W+"\n[*] Extracting to: /extract/extract_"+apkF[10:]+".." ,
-	if not os.path.exists("./extract/extract_"+apkF[10:]):
-		os.makedirs("./extract/extract_"+apkF[10:])
+	print G+"\t[DONE]"+W
+	print "[*] all operations saved on ./decompile/decompile_"+apkF[10:-4] ,
+	if not os.path.exists("./decompile/decompile_"+apkF[10:-4]):
+		os.makedirs("./decompile/decompile_"+apkF[10:-4])
 		try:
-			apk=zipfile.ZipFile("./extract/"+apkF[10:])
-			apk.extractall("./extract/extract_"+apkF[10:])
-			print G+"\t[DONE]"+W
+			exeCMD="java -jar "+APKTOOL+" decode ./decompile/"+apkF[10:]+" -f -o ./decompile/decompile_"+apkF[10:-4]
+			os.system(exeCMD)
 		except:
-			print R+"\t[FAILED (APK not found)]"+W
+			print R+"\t[FAILED]"+W
 	else:
-		print R+"\n[FAILED (already exists)]"+W
+		print R+"\n[-]FAILED (path already exists)"+W
 	
 
-def menu(adb):
+def menu(adb,APKTOOL):
 	while (1):
 		print "\n\n----------------------------------------"
 		print "1. Analyze APP internal files and look for interesting files(rooted device only)"
-		print "2. Pull application APK and extract"
+		print "2. Pull and decompile application files"
 		print "3. Dump meminfo of application"
 		print "4. List and launch Activities(soon)"
 		print "5. Bypass device authentication(password,pattern...)"
@@ -190,7 +190,7 @@ def menu(adb):
 		if option is '1':
 			analyze(adb)
 		elif option is '2':
-			extractAPK(adb)
+			decompileAPK(adb,APKTOOL)
 		elif option is '3':
 			meminfo(adb)
 		elif option is '4':
@@ -267,6 +267,6 @@ def main():
 		print R+"\n[-] Error:\t- ADB: %s\t - Python: %s" % (adb.get_error(),e.args)
 		exit(-5)
 	print "\n[+] Using \"%s\" as target device" % devices[dev]
-	menu(adb)
+	menu(adb,APKTOOL)
 if __name__ == "__main__":
 	main()
