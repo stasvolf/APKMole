@@ -17,7 +17,21 @@ W  = '\033[0m'  # white (normal)
 R  = '\033[31m' # red
 G  = '\033[32m' # green
 C  = '\033[36m' # cyan
-
+def analyseManifest(adb):
+	decompiledExists=0
+	if not os.path.exists("./decompile"):
+		print R+"[-] Didn't found ./dicompile folder.\nuse option 2 - decompile first"+W
+		return
+	print "[*] Application ready for analysis:" ,
+	decompiled=os.listdir("./decompile") 
+	for filename in decompiled:
+		if "decompile_" in filename:
+			decompiledExists=1
+			print "\n"+filename[10:]
+	if decompiledExists==0:
+		print R+"\t[NONE]"+W
+		return
+	
 def bypass(adb):
 	print "[*] Checking root...." ,
 	supath = adb.find_binary("su")
@@ -76,7 +90,7 @@ def meminfo(adb):
 def lnlaunceActivities(adb):
 	print "soon..."
 	
-def analyze(adb):
+def analyse(adb):
 	packageTarget,apkFile=appPrint(adb)
 	print "[*] Checking root...." ,
 	supath = adb.find_binary("su")
@@ -181,21 +195,24 @@ def decompileAPK(adb,APKTOOL):
 def menu(adb,APKTOOL):
 	while (1):
 		print "\n\n----------------------------------------"
-		print "1. Analyze APP internal files and look for interesting files(rooted device only)"
-		print "2. Pull and decompile application files"
-		print "3. Dump meminfo of application"
-		print "4. List and launch Activities(soon)"
-		print "5. Bypass device authentication(password,pattern...)"
+		print "1. Analyse APP internal files and look for interesting files(rooted device only)"
+		print "2. Pull and decompile APK application files"
+		print "3. Analyse decompiled Manifest and launch activities"
+		print "4. Dump meminfo of an application"
+		print "6. List and launch Activities(soon)"
+		print "7. Bypass device authentication(password,pattern...)"
 		option = raw_input("option(q - quit): ")
 		if option is '1':
-			analyze(adb)
+			analyse(adb)
 		elif option is '2':
 			decompileAPK(adb,APKTOOL)
 		elif option is '3':
-			meminfo(adb)
+			analyseManifest(adb)
 		elif option is '4':
-			lnlaunceActivities(adb)
+			meminfo(adb)
 		elif option is '5':
+			lnlaunceActivities(adb)
+		elif option is '6':
 			bypass(adb)
 		elif option is 'q':
 			exit(-10)
