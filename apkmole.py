@@ -31,7 +31,37 @@ def analyseManifest(adb):
 	if decompiledExists==0:
 		print R+"\t[NONE]"+W
 		return
-	
+	while(1):
+		toAnalyse = raw_input("Enter package to analyse(q - quit):")
+		if toAnalyse is 'q':
+			return
+		if "decompile_"+toAnalyse not in decompiled:
+			continue
+		else:
+			break
+	print "[*] Opening Manifest file.." ,
+	try:
+		mani = open("./decompile/decompile_"+toAnalyse+"/AndroidManifest.xml","r")
+		print G+"\t[DONE]"+W
+	except:
+		print R+"\t[FAILED]"+W
+	maniLines = mani.readlines()
+	print "[*] Activities available:"
+	for activity in maniLines:
+		if "<activity" in activity:
+			activitySplitted=activity.split(' ')
+			for element in activitySplitted:
+				if "name=" in element:
+					print element[14:].strip("\"").strip("\">").strip("\"/>\n")
+	while (1):
+		activityChosen = raw_input("Choose an activity to invoke(q -quit):")
+		if activityChosen is 'q':
+			return
+		itemset = set(i.lower() for i in maniLines)
+		if "com" in itemset:
+			break
+		continue
+	print "invokingggg"
 def bypass(adb):
 	print "[*] Checking root...." ,
 	supath = adb.find_binary("su")
@@ -66,8 +96,8 @@ def appPrint(adb):
 	packageTarget=None
 	while (1):
 		packageTarget =  raw_input("[#] Enter package name to analyse(q - quit):")
-		if (packageTarget is 'q'):
-			exit(-7)
+		if packageTarget is 'q':
+			exit(-1)
 		try:
 			path2apk = "pm path "+packageTarget
 			theApk=adb.shell_command(path2apk)
