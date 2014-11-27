@@ -68,6 +68,10 @@ def appPrint(adb):
 			print R+"[-] Package not found."+W
 	return (packageTarget,apkFile)
 
+def meminfo(adb):
+	packageTarget,apkFile=appPrint(adb)
+	cmd = "dumpsys meminfo "+packageTarget
+	print adb.shell_command(cmd)
 def analyze(adb):
 	packageTarget,apkFile=appPrint(adb)
 	print "[*] Checking root...." ,
@@ -93,7 +97,7 @@ def analyze(adb):
 		print R+"\t[FAILED] - can't create remote tar."+W
 	print "[*] Retrieving remote file: "+tarname ,
 	try:
-		if not os.path.exists("./analyse/"):
+		if not os.patfh.exists("./analyse/"):
 			os.makedirs("./analyse/")
 		if not os.path.exists("./analyse/"+packageTarget):
 			os.makedirs("./analyse/"+packageTarget)
@@ -170,11 +174,6 @@ def decompile(adb):
 			print R+"\t[FAILED (APK not found)]"+W
 	else:
 		print R+"\n[FAILED (already exists)]"+W
-def pull(adb, apkF):
-	print "[*] Pulling APK.."
-	
-def pullApp(apkF):
-	print "pilling app"
 	
 
 def menu(adb):
@@ -182,17 +181,17 @@ def menu(adb):
 		print "\n\n----------------------------------------"
 		print "1. Analyze APP internal files(rooted device only)"
 		print "2. Pull application APK and prepare for decompilation"
-		print "3. Bypass device authentication(password,pattern...)"
-		print "4. Pull application folder"
+		print "3. Dump meminfo of application"
+		print "4. Bypass device authentication(password,pattern...)"
 		option = raw_input("option(q - quit): ")
 		if option is '1':
 			analyze(adb)
 		elif option is '2':
 			decompile(adb)
 		elif option is '3':
-			bypass(adb)
+			meminfo(adb)
 		elif option is '4':
-			pullApp(apkFile)
+			bypass(adb)
 		elif option is 'q':
 			exit(-10)
 		else:
