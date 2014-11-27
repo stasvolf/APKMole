@@ -27,7 +27,7 @@ def analyseManifest(adb):
 	for filename in decompiled:
 		if "decompile_" in filename:
 			decompiledExists=1
-			print "\n"+filename[10:]
+			print C+"\n"+filename[10:]+W
 	if decompiledExists==0:
 		print R+"\t[NONE]"+W
 		return
@@ -52,16 +52,18 @@ def analyseManifest(adb):
 			activitySplitted=activity.split(' ')
 			for element in activitySplitted:
 				if "name=" in element:
+					element=element[:element.rindex(".")] + "/" + element[element.rindex("."):]
 					print element[14:].strip("\"").strip("\">").strip("\"/>\n")
 	while (1):
 		activityChosen = raw_input("Choose an activity to invoke(q -quit):")
 		if activityChosen is 'q':
 			return
-		itemset = set(i.lower() for i in maniLines)
-		if "com" in itemset:
-			break
-		continue
-	print "invokingggg"
+		for elementL in maniLines:
+			if activityChosen not in elementL:
+				continue
+		break
+	print "[*] Invoking "+activityChosen+" activity.."
+	print adb.shell_command("su -c 'am start -n "+activityChosen+"'")
 def bypass(adb):
 	print "[*] Checking root...." ,
 	supath = adb.find_binary("su")
