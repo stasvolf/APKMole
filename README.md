@@ -5,6 +5,7 @@ ADB &amp; APKTool wrapper for application analysis located on an android device.
 this tool automates interaction with your device using ADB and APKTool.
 
 following operations supported on this version:
+
 1. Analyse APP internal files and look for interesting files -
 connecting to your device, imports all application files and looking for interesting files( for now only "db" and "xml").
 all application's ever analysed stored on "./analyse" directory.
@@ -26,8 +27,10 @@ removes all *.key files from /data/system directory to bypass device authenticat
 INSTALLATION
 ============
 *******CHANGE ADB and APKTool VARIABLES*******
+
 APKTool path - change APKTool path:(line 253)
 	APKTOOL = "/home/example/Downloads/apktool_2.0.0rc3.jar"  # APKTOOL Directory
+	
 ADB path - change ADB path:(line 254)
 	ADBTOOL = "/usr/bin/adb" # ADB Directory
 
@@ -35,6 +38,7 @@ ADB path - change ADB path:(line 254)
 	
 *******DEPENDENCIES*******
 1.libraries:
+
 	pyadb
 	os
 	zipfile
