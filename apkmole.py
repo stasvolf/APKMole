@@ -250,7 +250,7 @@ def menu(adb,APKTOOL): #menu handeling
 				
 		
 def main():
-	APKTOOL = "/home/stas/Downloads/apktool_2.0.0rc3.jar"  # APKTOOL Directory
+	APKTOOL = "/home/example/Downloads/apktool_2.0.0rc3.jar"  # APKTOOL Directory
 	ADBTOOL = "/usr/bin/adb" # ADB Directory
 	print "#################################################################################"
 	print "#                                APKmole V1.0                                   #"
