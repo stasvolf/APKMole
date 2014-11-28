@@ -29,14 +29,17 @@ INSTALLATION
 *******CHANGE ADB and APKTool VARIABLES*******
 
 APKTool path - change APKTool path:(line 253)
+
 	APKTOOL = "/home/example/Downloads/apktool_2.0.0rc3.jar"  # APKTOOL Directory
 	
 ADB path - change ADB path:(line 254)
+
 	ADBTOOL = "/usr/bin/adb" # ADB Directory
 
 	
 	
 *******DEPENDENCIES*******
+
 1.libraries:
 
 	pyadb
