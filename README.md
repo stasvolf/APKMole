@@ -25,21 +25,31 @@ removes all *.key files from /data/system directory to bypass device authenticat
 
 INSTALLATION
 ============
+*******CHANGE ADB and APKTool VARIABLES*******
+APKTool path - change APKTool path:(line 253)
+	APKTOOL = "/home/example/Downloads/apktool_2.0.0rc3.jar"  # APKTOOL Directory
+ADB path - change ADB path:(line 254)
+	ADBTOOL = "/usr/bin/adb" # ADB Directory
 
-libraries:
-	from pyadb import ADB
-	import os
-	import zipfile
-	import time
-	import random
-	import string
-	import tarfile
-	import shutil
-	from sys import stdin
 	
-pyadb: https://github.com/sch3m4/pyadb
+	
+*******DEPENDENCIES*******
+1.libraries:
+	pyadb
+	os
+	zipfile
+	time
+	random
+	string
+	tarfile
+	shutil
+	sys
 
-next version TODO's:
+*pyadb: https://github.com/sch3m4/pyadb
+
+2.APKTool,ADB
+
+*******next version TODO's*******
 
 1. Minimalism in Code
 2. More analysis operations.
