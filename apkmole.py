@@ -256,7 +256,7 @@ def main():
 	print "#                                APKmole V1.0                                   #"
 	print "# ADB & APKTool wrapper for application analysis located on an android device   #"
 	print "# Author: Stas Volfus                                                           #"
-	print "#                                                                               #"
+	print "# the author isn't responsible for any damage caused by using this tool         #"                                                                              #"
 	print "#################################################################################"
 	print "\nADB Path: "+ADBTOOL
 	print "APKtool Path: "+APKTOOL    
