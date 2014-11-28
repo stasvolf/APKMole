@@ -22,12 +22,12 @@ def analyseManifest(adb):
 	if not os.path.exists("./decompile"):
 		print R+"[-] Didn't found ./dicompile folder.\nuse option 2 - decompile first"+W
 		return
-	print "[*] Application ready for analysis:" ,
+	print "[*] Application ready for analysis:" 
 	decompiled=os.listdir("./decompile") 
 	for filename in decompiled:
 		if "decompile_" in filename:
 			decompiledExists=1
-			print C+"\n"+filename[10:]+W
+			print C+filename[10:]+W
 	if decompiledExists==0:
 		print R+"\t[NONE]"+W
 		return
@@ -58,12 +58,10 @@ def analyseManifest(adb):
 		activityChosen = raw_input("Choose an activity to invoke(q -quit):")
 		if activityChosen is 'q':
 			return
-		for elementL in maniLines:
-			if activityChosen not in elementL:
-				continue
-		break
-	print "[*] Invoking "+activityChosen+" activity.."
-	print adb.shell_command("su -c 'am start -n "+activityChosen+"'")
+		print "[*] Invoking "+activityChosen+" activity.."
+		actExe = adb.shell_command("su -c 'am start -n "+activityChosen+"'")
+		if "Error" in actExe:
+			print actExe[actExe.rfind("Error"):]
 def bypass(adb):
 	print "[*] Checking root...." ,
 	supath = adb.find_binary("su")
