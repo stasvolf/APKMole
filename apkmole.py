@@ -17,7 +17,8 @@ W  = '\033[0m'  # white (normal)
 R  = '\033[31m' # red
 G  = '\033[32m' # green
 C  = '\033[36m' # cyan
-def analyseManifest(adb):
+
+def analyseManifest(adb): #analyse Manifest file and invoke activities
 	decompiledExists=0
 	if not os.path.exists("./decompile"):
 		print R+"[-] Didn't found ./dicompile folder.\nuse option 2 - decompile first"+W
@@ -55,14 +56,15 @@ def analyseManifest(adb):
 					element=element[:element.rindex(".")] + "/" + element[element.rindex("."):]
 					print C+element[14:].strip("\"").strip("\">").strip("\"/>\n")+W
 	while (1):
-		activityChosen = raw_input("Choose an activity to invoke(ex : com.whatsapp/.Main , q -quit):")
+		activityChosen = raw_input("[#]Choose an activity to invoke(ex : com.whatsapp/.Main , q -quit):")
 		if activityChosen is 'q':
 			return
 		print "[*] Invoking "+activityChosen+" activity.."
-		actExe = adb.shell_command("su -c 'am start -n "+activityChosen+"'")
+		actExe = adb.shell_command("su -c 'am start -n "+activityChosen+"'") #remove " su -c ' " to run as regular user
 		if "Error" in actExe:
 			print actExe[actExe.rfind("Error"):]
-def bypass(adb):
+			
+def bypass(adb): #unlock device authentication
 	print "[*] Checking root...." ,
 	supath = adb.find_binary("su")
 	if "not found" not in supath:
@@ -85,7 +87,7 @@ def bypass(adb):
 		return
 		
 
-def appPrint(adb):
+def appPrint(adb): # print device applications and resolve apk
 	try:
 		print "\n[*] Applications installed:\n"
 		apps=adb.shell_command("pm list packages")
@@ -112,15 +114,13 @@ def appPrint(adb):
 			print R+"[-] Package not found."+W
 	return (packageTarget,apkFile)
 
-def meminfo(adb):
+def meminfo(adb): # print meminfo
 	packageTarget,apkFile=appPrint(adb)
 	cmd = "dumpsys meminfo "+packageTarget
 	print adb.shell_command(cmd)
 	
-def lnlaunceActivities(adb):
-	print "soon..."
 	
-def analyse(adb):
+def analyse(adb): #pull and analyse application folder from device
 	packageTarget,apkFile=appPrint(adb)
 	print "[*] Checking root...." ,
 	supath = adb.find_binary("su")
@@ -194,7 +194,7 @@ def analyse(adb):
 	print G+"\n[*] Checkout \"./analyse/"+packageTarget+"/interesting_files\" for more details.."+W
 	tarA.close()
 
-def decompileAPK(adb,APKTOOL):
+def decompileAPK(adb,APKTOOL): #pull and decomile apk file from device
 	packageTarget,apkFile = appPrint(adb)
 	apkF=apkFile.rstrip('\r\n')
 	print "[*] Importing APK file.." ,
@@ -223,7 +223,7 @@ def decompileAPK(adb,APKTOOL):
 		print R+"\n[-]FAILED (path already exists)"+W
 	
 
-def menu(adb,APKTOOL):
+def menu(adb,APKTOOL): #menu handeling
 	while (1):
 		print "\n\n----------------------------------------"
 		print "1. Analyse APP internal files and look for interesting files(rooted device)"
@@ -250,7 +250,7 @@ def menu(adb,APKTOOL):
 				
 		
 def main():
-	APKTOOL = "/home/example/Downloads/apktool_2.0.0rc3.jar"  # APKTOOL Directory
+	APKTOOL = "/home/stas/Downloads/apktool_2.0.0rc3.jar"  # APKTOOL Directory
 	ADBTOOL = "/usr/bin/adb" # ADB Directory
 	print "#################################################################################"
 	print "#                                APKmole V1.0                                   #"
@@ -298,7 +298,7 @@ def main():
 	for dev in devices:
 		print "\t%d: %s" % (i,dev)
 		i += 1
-	#more that one device..
+	#more than one device..
 	if i > 1:
 		dev = i + 1
 		while dev < 0 or dev > int(i - 1):
