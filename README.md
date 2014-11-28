@@ -24,8 +24,8 @@ displays meminfo of a specific application.
 removes all *.key files from /data/system directory to bypass device authentication.
 
 
-INSTALLATION
-============
+<h3>INSTALLATION</h3>
+
 *******CHANGE ADB and APKTool VARIABLES*******
 
 APKTool path - change APKTool path:(line 253)
@@ -38,7 +38,7 @@ ADB path - change ADB path:(line 254)
 
 	
 	
-*******DEPENDENCIES*******
+<h3>DEPENDENCIES</h3>
 
 1.libraries:
 
@@ -56,7 +56,8 @@ ADB path - change ADB path:(line 254)
 
 2.APKTool,ADB
 
-*******next version TODO's*******
+<h3>USAGE<h3>
 
-1. Minimalism in Code
-2. More analysis operations.
+python apkmole.py
+
+
