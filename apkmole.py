@@ -53,9 +53,9 @@ def analyseManifest(adb):
 			for element in activitySplitted:
 				if "name=" in element:
 					element=element[:element.rindex(".")] + "/" + element[element.rindex("."):]
-					print element[14:].strip("\"").strip("\">").strip("\"/>\n")
+					print C+element[14:].strip("\"").strip("\">").strip("\"/>\n")+W
 	while (1):
-		activityChosen = raw_input("Choose an activity to invoke(q -quit):")
+		activityChosen = raw_input("Choose an activity to invoke(ex : com.whatsapp/.Main , q -quit):")
 		if activityChosen is 'q':
 			return
 		print "[*] Invoking "+activityChosen+" activity.."
@@ -95,7 +95,7 @@ def appPrint(adb):
 		exit(-6)
 	packageTarget=None
 	while (1):
-		packageTarget =  raw_input("[#] Enter package name to analyse(q - quit):")
+		packageTarget =  raw_input("[#] Enter package name to analyse(ex: com.whatsapp, q - quit):")
 		if packageTarget is 'q':
 			exit(-1)
 		try:
@@ -145,7 +145,7 @@ def analyse(adb):
 		print R+"\t[FAILED] - can't create remote tar."+W
 	print "[*] Retrieving remote file: "+tarname ,
 	try:
-		if not os.patfh.exists("./analyse/"):
+		if not os.path.exists("./analyse/"):
 			os.makedirs("./analyse/")
 		if not os.path.exists("./analyse/"+packageTarget):
 			os.makedirs("./analyse/"+packageTarget)
@@ -153,6 +153,7 @@ def analyse(adb):
 		print G+"\t[DONE]"+W
 	except:
 		print R+"\t[FAILED] - can't create directory."+W
+		return
 	print "[*] Removing remote file: "+tarname ,
 	cmd = 'su -c \'rm %s\'' % tarname
 	try:
@@ -179,7 +180,7 @@ def analyse(adb):
 					os.makedirs("./analyse/"+packageTarget+"/interesting_files/db")
 				shutil.copy("./analyse/"+packageTarget+"/"+member,"./analyse/"+packageTarget+"/interesting_files/db")
 			except:
-				print R+"\t[FAILED] - couldn't copy to \"interesting_files\""+W
+				print R+"\t[FAILED] - copy to \"interesting_files\""+W
 	print "[*] XML files:\n"	
 	for member in tarA.getnames():
 		if ".xml" in member:
@@ -189,7 +190,7 @@ def analyse(adb):
 					os.makedirs("./analyse/"+packageTarget+"/interesting_files/xml")
 				shutil.copy("./analyse/"+packageTarget+"/"+member,"./analyse/"+packageTarget+"/interesting_files/xml")
 			except:
-				print R+"\t[FAILED] - couldn't copy to \"interesting_files\""+W
+				print R+"\t[FAILED] - copy to \"interesting_files\""+W
 	print G+"\n[*] Checkout \"./analyse/"+packageTarget+"/interesting_files\" for more details.."+W
 	tarA.close()
 
@@ -225,12 +226,11 @@ def decompileAPK(adb,APKTOOL):
 def menu(adb,APKTOOL):
 	while (1):
 		print "\n\n----------------------------------------"
-		print "1. Analyse APP internal files and look for interesting files(rooted device only)"
+		print "1. Analyse APP internal files and look for interesting files(rooted device)"
 		print "2. Pull and decompile APK application files"
-		print "3. Analyse decompiled Manifest and launch activities"
+		print "3. Analyse decompiled Manifest and invoke activities(rooted device)"
 		print "4. Dump meminfo of an application"
-		print "6. List and launch Activities(soon)"
-		print "7. Bypass device authentication(password,pattern...)"
+		print "5. Bypass device authentication(password,pattern...)"
 		option = raw_input("option(q - quit): ")
 		if option is '1':
 			analyse(adb)
@@ -241,8 +241,6 @@ def menu(adb,APKTOOL):
 		elif option is '4':
 			meminfo(adb)
 		elif option is '5':
-			lnlaunceActivities(adb)
-		elif option is '6':
 			bypass(adb)
 		elif option is 'q':
 			exit(-10)
@@ -252,14 +250,14 @@ def menu(adb,APKTOOL):
 				
 		
 def main():
-	APKTOOL = "/home/stas/Downloads/apktool_2.0.0rc3.jar"  # APKTOOL Directory
+	APKTOOL = "/home/example/Downloads/apktool_2.0.0rc3.jar"  # APKTOOL Directory
 	ADBTOOL = "/usr/bin/adb" # ADB Directory
-	print "#########################################################################"
-	print "#                             APKmole V1.0                              #"
-	print "# ADB & APKTool wrapper to analyse application on your Android device   #"
-	print "# Author: Stas Volfus                                                   #"
-	print "#                                                                       #"
-	print "#########################################################################"
+	print "#################################################################################"
+	print "#                                APKmole V1.0                                   #"
+	print "# ADB & APKTool wrapper for application analysis located on an android device   #"
+	print "# Author: Stas Volfus                                                           #"
+	print "#                                                                               #"
+	print "#################################################################################"
 	print "\nADB Path: "+ADBTOOL
 	print "APKtool Path: "+APKTOOL    
 	print "\n\n[*] Setting up ADB.."
