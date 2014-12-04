@@ -50,6 +50,7 @@ ADB path - change ADB path:(line 254)
 	string
 	tarfile
 	shutil
+	xml
 	sys
 
 *pyadb: https://github.com/sch3m4/pyadb
