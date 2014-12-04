@@ -6,23 +6,25 @@ this tool automates interaction with your device using ADB and APKTool.
 
 following operations supported on this version:
 
-1.Analyse APP internal files and look for interesting files -<br>
-connecting to your device, imports all application files and looking for interesting files( for now only "db" and "xml").
+1. <b>Analyse APP internal files and look for interesting files </b>-<br>
+connecting to your device, imports all application files and looking for interesting files( for now only "db" and "xml").<br>
 all application's ever analysed stored on "./analyse" directory.
 *requires rooted device.
 
-2. Pull and decompile APK application files -<br>
+
+2. <b>Pull and decompile APK application files </b>-br>
 connecting to your device, imports APK file, decompiles the file using APKTool and saves the results on "./decompile" directory.
 
 3. <b>Analyse decompiled Manifest and invoke activities(rooted device) </b>-<br>
 explores "./decompile" directory for decompiled applications and analysing Manifest file for activities to invoke.
 
-4. Analyse decompiled Manifest file -<br> analyse Manifest of decompiled application map all activities and providers.
+4. <b>Analyse decompiled Manifest file </b>-<br> 
+analyse Manifest of decompiled application map all activities and providers.
 
-5. Dump meminfo of an application -<br>
+5. <b>Dump meminfo of an application </b>-<br>
 displays meminfo of a specific application.
 
-6. Bypass device authentication(password,pattern...) -<br>
+6. <b>Bypass device authentication(password,pattern...) </b>-<br>
 removes all *.key files from /data/system directory to bypass device authentication.
 
 
