@@ -17,10 +17,12 @@ connecting to your device, imports APK file, decompiles the file using APKTool a
 3. Analyse decompiled Manifest and invoke activities(rooted device) -
 explores "./decompile" directory for decompiled applications and analysing Manifest file for activities to invoke.
 
-4. Dump meminfo of an application -
+4. Analyse decompiled Manifest file - analyse Manifest of decompiled application map all activities and providers.
+
+5. Dump meminfo of an application -
 displays meminfo of a specific application.
 
-5. Bypass device authentication(password,pattern...) -
+6. Bypass device authentication(password,pattern...) -
 removes all *.key files from /data/system directory to bypass device authentication.
 
 
