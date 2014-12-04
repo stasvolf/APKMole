@@ -8,6 +8,7 @@ try:
 	import string
 	import tarfile
 	import shutil
+	from xml.dom import minidom
 	from sys import stdin
 except ImportError,e:
 	print "[f] Required module missing. %s" % e.args[0]
@@ -21,7 +22,7 @@ C  = '\033[36m' # cyan
 def analyseManifest(adb): #analyse Manifest file and invoke activities
 	decompiledExists=0
 	if not os.path.exists("./decompile"):
-		print R+"[-] Didn't found ./dicompile folder.\nuse option 2 - decompile first"+W
+		print R+"[-] Didn't found ./decompile folder.\nuse option 2 - decompile first"+W
 		return
 	print "[*] Application ready for analysis:" 
 	decompiled=os.listdir("./decompile") 
@@ -40,21 +41,18 @@ def analyseManifest(adb): #analyse Manifest file and invoke activities
 			continue
 		else:
 			break
-	print "[*] Opening Manifest file.." ,
+	print "[*] Opening Manifest file..\n" ,
 	try:
-		mani = open("./decompile/decompile_"+toAnalyse+"/AndroidManifest.xml","r")
-		print G+"\t[DONE]"+W
+		xmlManifest = minidom.parse("./decompile/decompile_"+toAnalyse+"/AndroidManifest.xml")
+		activitiesXML = xmlManifest.getElementsByTagName('activity') 
+		print str(len(activitiesXML))+" activities detected:\n"
+		for activity in activitiesXML :
+			activityValue=activity.attributes['android:name'].value
+			activityFixed=activityValue[:activityValue.rindex(".")] + "/" + activityValue[activityValue.rindex("."):]
+			print activityFixed
 	except:
-		print R+"\t[FAILED]"+W
-	maniLines = mani.readlines()
-	print "[*] Activities available:"
-	for activity in maniLines:
-		if "<activity" in activity:
-			activitySplitted=activity.split(' ')
-			for element in activitySplitted:
-				if "name=" in element:
-					element=element[:element.rindex(".")] + "/" + element[element.rindex("."):]
-					print C+element[14:].strip("\"").strip("\">").strip("\"/>\n")+W
+		print "[-] Failed analysing MAinfest file.."
+		return
 	while (1):
 		activityChosen = raw_input("[#]Choose an activity to invoke(ex : com.whatsapp/.Main , q -quit):")
 		if activityChosen is 'q':
@@ -250,7 +248,7 @@ def menu(adb,APKTOOL): #menu handeling
 				
 		
 def main():
-	APKTOOL = "/home/stas/Downloads/apktool_2.0.0rc3.jar"  # APKTOOL Directory
+	APKTOOL = "/home/example/Downloads/apktool_2.0.0rc3.jar"  # APKTOOL Directory
 	ADBTOOL = "/usr/bin/adb" # ADB Directory
 	print "#################################################################################"
 	print "#                                APKmole V1.0                                   #"
