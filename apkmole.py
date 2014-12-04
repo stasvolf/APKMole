@@ -49,9 +49,9 @@ def analyseManifest(adb): #analyse Manifest file and invoke activities
 		for activity in activitiesXML :
 			activityValue=activity.attributes['android:name'].value
 			activityFixed=activityValue[:activityValue.rindex(".")] + "/" + activityValue[activityValue.rindex("."):]
-			print activityFixed
+			print C+activityFixed+W
 	except:
-		print "[-] Failed analysing MAinfest file.."
+		print "[-] Failed analysing Mainfest file.."
 		return
 	while (1):
 		activityChosen = raw_input("[#]Choose an activity to invoke(ex : com.whatsapp/.Main , q -quit):")
@@ -61,6 +61,7 @@ def analyseManifest(adb): #analyse Manifest file and invoke activities
 		actExe = adb.shell_command("su -c 'am start -n "+activityChosen+"'") #remove " su -c ' " to run as regular user
 		if "Error" in actExe:
 			print actExe[actExe.rfind("Error"):]
+			
 			
 def bypass(adb): #unlock device authentication
 	print "[*] Checking root...." ,
@@ -117,6 +118,61 @@ def meminfo(adb): # print meminfo
 	cmd = "dumpsys meminfo "+packageTarget
 	print adb.shell_command(cmd)
 	
+	
+def analyseManifestContent(adb): #analyse Manifest file
+	decompiledExists=0
+	if not os.path.exists("./decompile"):
+		print R+"[-] Didn't found ./decompile folder.\nuse option 2 - decompile first"+W
+		return
+	print "[*] Application ready for analysis:" 
+	decompiled=os.listdir("./decompile") 
+	for filename in decompiled:
+		if "decompile_" in filename:
+			decompiledExists=1
+			print C+filename[10:]+W
+	if decompiledExists==0:
+		print R+"\t[NONE]"+W
+		return
+	while(1):
+		toAnalyse = raw_input("Enter package to analyse(q - quit):")
+		if toAnalyse is 'q':
+			return
+		if "decompile_"+toAnalyse not in decompiled:
+			continue
+		else:
+			break
+	print "[*] Opening Manifest file..\n" ,
+	try:
+		xmlManifest = minidom.parse("./decompile/decompile_"+toAnalyse+"/AndroidManifest.xml")
+		activXML = xmlManifest.getElementsByTagName('activity') 
+		provXML = xmlManifest.getElementsByTagName('provider') 
+		print "[*] "+str(len(activXML))+" activities detected."
+		print "[*] "+str(len(provXML))+" providers detected.\n\n"
+		print "Activities:\n"
+		for activity in activXML :
+			print C+activity.attributes['android:name'].value+W ,
+			if activity.hasAttribute('android:exported'):
+				if activity.attributes['android:exported'].value == "false":	
+					print "\t[exported: "+G+activity.attributes['android:exported'].value+W+"]"
+				else:	
+					print "\t[exported: "+R+activity.attributes['android:exported'].value+W+"]"
+			else:
+				print "\t[exported: not defined]"
+		print "Providers:\n"
+		for provider in provXML :
+			print C+provider.attributes['android:name'].value+W ,
+			if provider.hasAttribute('android:exported'):
+				if provider.attributes['android:exported'].value == "false":	
+					print "\t[exported: "+G+provider.attributes['android:exported'].value+W+"]"
+				else:	
+					print "\t[exported: "+R+provider.attributes['android:exported'].value+W+"]"
+			else:
+				print "\t[exported: not defined]"
+	except:
+		print "[-] Failed analysing Mainfest file.."
+		return
+	return
+			
 	
 def analyse(adb): #pull and analyse application folder from device
 	packageTarget,apkFile=appPrint(adb)
@@ -227,8 +283,9 @@ def menu(adb,APKTOOL): #menu handeling
 		print "1. Analyse APP internal files and look for interesting files(rooted device)"
 		print "2. Pull and decompile APK application files"
 		print "3. Analyse decompiled Manifest and invoke activities(rooted device)"
-		print "4. Dump meminfo of an application"
-		print "5. Bypass device authentication(password,pattern...)"
+		print "4. Analyse decompiled Manifest file"
+		print "5. Dump meminfo of an application"
+		print "6. Bypass device authentication(password,pattern...)"
 		option = raw_input("option(q - quit): ")
 		if option is '1':
 			analyse(adb)
@@ -237,8 +294,10 @@ def menu(adb,APKTOOL): #menu handeling
 		elif option is '3':
 			analyseManifest(adb)
 		elif option is '4':
-			meminfo(adb)
+			analyseManifestContent(adb)
 		elif option is '5':
+			meminfo(adb)
+		elif option is '6':
 			bypass(adb)
 		elif option is 'q':
 			exit(-10)
